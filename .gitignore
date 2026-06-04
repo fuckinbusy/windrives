@@ -1,0 +1,3 @@
+*.exe
+.clangd
+test.c
