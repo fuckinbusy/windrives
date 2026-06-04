@@ -17,10 +17,18 @@ typedef struct tagDRIVEINFO {
     double dFreeGb;
 } DRIVEINFO, *LPDRIVEINFO;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 UINT GetDrives(LPDRIVEINFO lpDst, UINT uCount);
 UINT GetRemovableDrives(LPDRIVEINFO lpDst, UINT uCount);
 UINT GetDrivesCount();
 void WaitForNewDriveConnected(DWORD dwTimeoutMs);
 BOOL GetDriveByLetter(WCHAR letter, LPDRIVEINFO lpDst);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // WIN32_I_HATE_WINAPI
