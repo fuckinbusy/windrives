@@ -24,7 +24,7 @@ extern "C" {
 UINT GetDrives(LPDRIVEINFO lpDst, UINT uCount);
 UINT GetRemovableDrives(LPDRIVEINFO lpDst, UINT uCount);
 UINT GetDrivesCount();
-void WaitForNewDriveConnected(DWORD dwTimeoutMs);
+BOOL WaitForNewDriveConnected(LPDRIVEINFO lpDst, DWORD dwTimeoutMs);
 BOOL GetDriveByLetter(WCHAR letter, LPDRIVEINFO lpDst);
 
 #ifdef __cplusplus

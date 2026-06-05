@@ -2,6 +2,8 @@
 #include <wchar.h>
 #include <wctype.h>
 
+#define DRIVES_MAX_COUNT 26
+
 static VOID FillDriveInfo(LPDRIVEINFO lpDst, LPCWSTR lpszDrivePath)
 {
     wcsncpy_s(lpDst->cLetter, 4, lpszDrivePath, 3);
@@ -33,7 +35,7 @@ static UINT GetDrivesImpl(LPDRIVEINFO lpDst, UINT uCount, BOOL bRemovable)
     DWORD dwDrives = GetLogicalDrives();
     UINT uDrivesFound = 0;
 
-    for (UINT i = 0; i < 26 && i < uCount; ++i) {
+    for (UINT i = 0; i < DRIVES_MAX_COUNT && i < uCount; ++i) {
         if (!(dwDrives & (1 << i))) continue;
 
         WCHAR szPath[] = { L'A' + i, L':', L'\\', L'\0' };
@@ -61,24 +63,40 @@ UINT GetDrivesCount()
     UINT count = 0;
     DWORD dwDrives = GetLogicalDrives();
 
-    for (UINT i = 0; i < 26; ++i)
+    for (UINT i = 0; i < DRIVES_MAX_COUNT; ++i)
         if (dwDrives & (1 << i)) count++;
 
     return count;
 }
 
-void WaitForNewDriveConnected(DWORD dwTimeoutMs)
+BOOL WaitForNewDriveConnected(LPDRIVEINFO lpDst, DWORD dwTimeoutMs)
 {
-    if (dwTimeoutMs == 0) return;
+    if (dwTimeoutMs == 0) return FALSE;
 
+    memset(lpDst, 0, sizeof(DRIVEINFO));
+    
     DWORD dwCurDrives = GetLogicalDrives();
+    DWORD dwNewDrives = dwCurDrives;
 
     while (dwTimeoutMs > 0) {
-        if (GetLogicalDrives() != dwCurDrives) break;
+        dwNewDrives = GetLogicalDrives();
+        if (dwNewDrives != dwCurDrives) break;
         DWORD dwSleep = dwTimeoutMs < 10 ? dwTimeoutMs : 10;
         Sleep(dwSleep);
         dwTimeoutMs -= dwSleep;
     }
+
+    DWORD newDriveMask = dwCurDrives ^ dwNewDrives;
+    WCHAR letter = '\0';
+    for (UINT i = 0; i < DRIVES_MAX_COUNT; ++i)
+        if (newDriveMask & (1u << i)) { letter = L'A' + i; break; }
+
+    if (letter == '\0') return FALSE;
+    
+    WCHAR szPath[] = { letter, L':', L'\\', L'\0' };
+    FillDriveInfo(lpDst, szPath);
+    
+    return TRUE;
 }
 
 BOOL GetDriveByLetter(WCHAR letter, LPDRIVEINFO lpDst)
