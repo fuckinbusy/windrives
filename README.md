@@ -78,8 +78,8 @@ UINT GetDrivesCount();
 BOOL GetDriveByLetter(WCHAR letter, LPDRIVEINFO lpDst);
 
 // Block until a new drive is connected or timeout expires.
-// Pass INFINITE if you enjoy waiting forever.
-void WaitForNewDriveConnected(DWORD dwTimeoutMs);
+// Returns FALSE on timeout, TRUE and fills lpDst on success.
+BOOL WaitForNewDriveConnected(LPDRIVEINFO lpDst, DWORD dwTimeoutMs);
 ```
 
 ---
@@ -99,7 +99,9 @@ for (UINT i = 0; i < count; i++) {
 }
 
 // Wait for a USB drive to be plugged in (up to 10 seconds)
-WaitForNewDriveConnected(10000);
+DRIVEINFO newDrive;
+if (WaitForNewDriveConnected(&newDrive, 10000))
+    wprintf(L"Connected: %s (%s)\n", newDrive.cLetter, newDrive.szLabel);
 
 // Get info on C: specifically
 DRIVEINFO c;
