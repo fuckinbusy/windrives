@@ -86,7 +86,7 @@ BOOL WaitForNewDriveConnected(LPDRIVEINFO lpDst, DWORD dwTimeoutMs)
         dwTimeoutMs -= dwSleep;
     }
 
-    DWORD newDriveMask = dwCurDrives ^ dwNewDrives;
+    DWORD newDriveMask = dwCurDrives & ~dwNewDrives;
     WCHAR letter = '\0';
     for (UINT i = 0; i < DRIVES_MAX_COUNT; ++i)
         if (newDriveMask & (1u << i)) { letter = L'A' + i; break; }
